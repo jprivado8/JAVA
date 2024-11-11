@@ -10,18 +10,30 @@ public class Deck {
 
     public Deck(String filename) throws IOException {
         loadCards(filename);
+        validateDeck();
     }
 
     private void loadCards(String filename) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line = reader.readLine();
             StringTokenizer tokenizer = new StringTokenizer(line, ",");
+
             while (tokenizer.hasMoreTokens()) {
                 String[] parts = tokenizer.nextToken().split("-");
                 Suit suit = Suit.valueOf(parts[0]);
                 Rank rank = Rank.valueOf(parts[1]);
                 cards.add(new Card(suit, rank));
             }
+        }
+    }
+
+    // Validation to ensure the deck is complete and unique
+    private void validateDeck() throws IOException {
+        Set<Card> uniqueCards = new HashSet<>(cards);
+
+        if (uniqueCards.size() != 52) {
+            System.err.println("Error: Deck must contain 52 unique cards without duplicates and no missing card.");
+            throw new IOException("Invalid deck configuration in input file.");
         }
     }
 
@@ -32,17 +44,14 @@ public class Deck {
     }
 
     private void riffleShuffle() {
-        // Cut the deck in half
         int mid = cards.size() / 2;
         List<Card> leftHalf = new ArrayList<>(cards.subList(0, mid));
         List<Card> rightHalf = new ArrayList<>(cards.subList(mid, cards.size()));
 
-        // Clear the original deck and interleave cards from each half
         cards.clear();
         int leftIndex = 0;
         int rightIndex = 0;
 
-        // Interleave the cards alternately from each half
         while (leftIndex < leftHalf.size() || rightIndex < rightHalf.size()) {
             if (leftIndex < leftHalf.size()) {
                 cards.add(leftHalf.get(leftIndex++));
